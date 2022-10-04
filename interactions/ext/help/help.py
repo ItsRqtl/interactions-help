@@ -5,13 +5,21 @@ from interactions import (
     Command,
     Embed,
     EmbedField,
+    EmbedFooter,
     Extension,
     OptionType,
     Permissions,
+    extension_command,
 )
+
+name = "help"
+description = "Shows help message"
+default_member_permissions = Permissions.DEFAULT
 
 
 class Help(Extension):
+    global name, description, default_member_permissions
+
     def __init__(
         self,
         client,
@@ -26,127 +34,129 @@ class Help(Extension):
         ephemeral,
         subcommands,
     ):
+        name: str = name
+        description: str = description
+        default_member_permissions: Permissions = default_member_permissions
+
         self.client: Client = client
-        self.name: str = name
-        self.description: str = description
         self.embed_title: str = embed_title
         self.embed_description: str = embed_description
         self.embed_color: int = embed_color
-        self.default_member_permissions: Permissions = default_member_permissions
+        self.embed_footer: EmbedFooter = embed_footer
+        self.embed_timestamp: bool = embed_timestamp
         self.ephemeral: bool = ephemeral
         self.subcommands: bool = subcommands
+
         self.allCommands: list = []
         self.embed: Embed = None
 
-        def parse_value(cmd: Command):
-            value = ""
-            # have options
-            if cmd.options:
-                # have subcommands
-                if cmd.has_subcommands:
-                    value += f"`{cmd.name}`\n"
-                    # have subcommand groups
-                    if (
-                        len(
-                            groups := [
-                                i
-                                for i in cmd.options
-                                if i.type == OptionType.SUB_COMMAND_GROUP
-                            ]
-                        )
-                        > 0
-                    ):
-                        groups.sort(key=lambda x: x.name)
-                        for group in groups:
-                            value += f"┣ `{group.name}`\n"
-                            # subcommands in group
-                            for sub in group.options:
-                                # subcommand in group has options
-                                if sub.options:
-                                    sub.options.sort(key=lambda x: x.required)
-                                    value += f"┃ ┣ `{sub.name}{''.join([f' <{i.name}>' if i.required else f' [{i.name}]' for i in sub.options])}`{f' - {sub.description}' if sub.description != 'No description set' else ''}\n"
-                                # subcommand has no options
-                                else:
-                                    value += f"┃ ┣ `{sub.name}`{f' - {sub.description}' if sub.description != 'No description set' else ''}\n"
-                    # process subcommands without groups
-                    for subcommand in cmd.options:
-                        if subcommand.type == OptionType.SUB_COMMAND:
-                            # subcommand has options
-                            if subcommand.options:
-                                subcommand.options.sort(key=lambda x: x.required)
-                                value += f"┣ `{subcommand.name}{''.join([f' <{i.name}>' if i.required else f' [{i.name}]' for i in subcommand.options])}`{f' - {subcommand.description}' if subcommand.description != 'No description set' else ''}\n"
+    def parse_value(cmd: Command):
+        value = ""
+        # have options
+        if cmd.options:
+            # have subcommands
+            if cmd.has_subcommands:
+                value += f"`{cmd.name}`\n"
+                # have subcommand groups
+                if (
+                    len(
+                        groups := [
+                            i
+                            for i in cmd.options
+                            if i.type == OptionType.SUB_COMMAND_GROUP
+                        ]
+                    )
+                    > 0
+                ):
+                    groups.sort(key=lambda x: x.name)
+                    for group in groups:
+                        value += f"┣ `{group.name}`\n"
+                        # subcommands in group
+                        for sub in group.options:
+                            # subcommand in group has options
+                            if sub.options:
+                                sub.options.sort(key=lambda x: x.required)
+                                value += f"┃ ┣ `{sub.name}{''.join([f' <{i.name}>' if i.required else f' [{i.name}]' for i in sub.options])}`{f' - {sub.description}' if sub.description != 'No description set' else ''}\n"
                             # subcommand has no options
                             else:
-                                value += f"┣ `{subcommand.name}`{f' - {subcommand.description}' if subcommand.description != 'No description set' else ''}\n"
-                # no subcommands
-                else:
-                    cmd.options.sort(key=lambda x: x.required)
-                    value += f"`{cmd.name}{''.join([f' <{i.name}>' if i.required else f' [{i.name}]' for i in cmd.options])}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
-            # don't have options
+                                value += f"┃ ┣ `{sub.name}`{f' - {sub.description}' if sub.description != 'No description set' else ''}\n"
+                # process subcommands without groups
+                for subcommand in cmd.options:
+                    if subcommand.type == OptionType.SUB_COMMAND:
+                        # subcommand has options
+                        if subcommand.options:
+                            subcommand.options.sort(key=lambda x: x.required)
+                            value += f"┣ `{subcommand.name}{''.join([f' <{i.name}>' if i.required else f' [{i.name}]' for i in subcommand.options])}`{f' - {subcommand.description}' if subcommand.description != 'No description set' else ''}\n"
+                        # subcommand has no options
+                        else:
+                            value += f"┣ `{subcommand.name}`{f' - {subcommand.description}' if subcommand.description != 'No description set' else ''}\n"
+            # no subcommands
             else:
-                value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
-            return value
+                cmd.options.sort(key=lambda x: x.required)
+                value += f"`{cmd.name}{''.join([f' <{i.name}>' if i.required else f' [{i.name}]' for i in cmd.options])}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
+        # don't have options
+        else:
+            value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
+        return value
 
-        async def _help(ctx):
-            if (
-                not self.allCommands
-                or self.allCommands != self.client._commands
-                or self.embed is None
-            ):
-                self.allCommands = self.client._commands
-                commands = {i.name: i for i in self.allCommands.copy()}
-                extensions = []
-                for i in self.client._extensions.values():
-                    if isinstance(i, Extension) and not i.__module__.startswith(
-                        "interactions.ext."
-                    ):
-                        extensions.append(i)
-                extensions.sort(key=lambda x: x.__module__)
+    @extension_command(
+        name=name,
+        description=description,
+        default_member_permissions=default_member_permissions,
+    )
+    async def _help(self, ctx):
+        if (
+            not self.allCommands
+            or self.allCommands != self.client._commands
+            or self.embed is None
+        ):
+            self.allCommands = self.client._commands
+            commands = {i.name: i for i in self.allCommands.copy()}
+            extensions = []
+            for i in self.client._extensions.values():
+                if isinstance(i, Extension) and not i.__module__.startswith(
+                    "interactions.ext."
+                ):
+                    extensions.append(i)
+            extensions.sort(key=lambda x: x.__module__)
 
-                fields = []
-                for ext in extensions:
-                    value = ""
-                    for command in ext._commands:
-                        cmd = commands[command[8:]]
-                        if self.subcommands:
-                            value += parse_value(cmd)
-                        else:
-                            value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
-                        commands.pop(command[8:])
-                    if value:
-                        fields.append(
-                            EmbedField(
-                                name=ext.__class__.__name__, value=value, inline=False
-                            )
+            fields = []
+            for ext in extensions:
+                value = ""
+                for command in ext._commands:
+                    cmd = commands[command[8:]]
+                    if self.subcommands:
+                        value += self.parse_value(cmd)
+                    else:
+                        value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
+                    commands.pop(command[8:])
+                if value:
+                    fields.append(
+                        EmbedField(
+                            name=ext.__class__.__name__, value=value, inline=False
                         )
-                if commands:
-                    value = ""
-                    for cmd in commands.values():
-                        if self.subcommands:
-                            value += parse_value(cmd)
-                        else:
-                            value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
-                    if value:
-                        fields.append(
-                            EmbedField(name="No category", value=value, inline=False)
-                        )
+                    )
+            if commands:
+                value = ""
+                for cmd in commands.values():
+                    if self.subcommands:
+                        value += self.parse_value(cmd)
+                    else:
+                        value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
+                if value:
+                    fields.append(
+                        EmbedField(name="No category", value=value, inline=False)
+                    )
 
-                self.embed = Embed(
-                    title=self.embed_title,
-                    description=self.embed_description,
-                    color=self.embed_color,
-                    fields=fields,
-                    footer=embed_footer,
-                    timestamp=datetime.utcnow() if embed_timestamp else None,
-                )
-            await ctx.send(embeds=[self.embed], ephemeral=self.ephemeral)
-
-        self.client.command(
-            name=self.name,
-            description=self.description,
-            default_member_permissions=self.default_member_permissions,
-            options=[],
-        )(_help)
+            self.embed = Embed(
+                title=self.embed_title,
+                description=self.embed_description,
+                color=self.embed_color,
+                fields=fields,
+                footer=self.embed_footer,
+                timestamp=datetime.utcnow() if self.embed_timestamp else None,
+            )
+        await ctx.send(embeds=[self.embed], ephemeral=self.ephemeral)
 
 
 def setup(
