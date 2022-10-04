@@ -49,7 +49,9 @@ class Help(Extension):
                     if (
                         len(
                             groups := [
-                                i for i in cmd.options if i.type == OptionType.SUB_COMMAND_GROUP
+                                i
+                                for i in cmd.options
+                                if i.type == OptionType.SUB_COMMAND_GROUP
                             ]
                         )
                         > 0
@@ -113,7 +115,9 @@ class Help(Extension):
                         commands.pop(command[8:])
                     if value:
                         fields.append(
-                            EmbedField(name=ext.__class__.__name__, value=value, inline=False)
+                            EmbedField(
+                                name=ext.__class__.__name__, value=value, inline=False
+                            )
                         )
                 if commands:
                     value = ""
@@ -123,7 +127,9 @@ class Help(Extension):
                         else:
                             value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
                     if value:
-                        fields.append(EmbedField(name="No category", value=value, inline=False))
+                        fields.append(
+                            EmbedField(name="No category", value=value, inline=False)
+                        )
 
                 self.embed = Embed(
                     title=self.embed_title,
@@ -151,7 +157,7 @@ def setup(
     embed_description="Here is a list of all commands",  # Description of the embed
     embed_color=0x000000,  # Color of the embed
     embed_footer=None,  # Footer of the embed
-    embed_timestamp=False,  # Timestamp of the embed
+    embed_timestamp=False,  # Weather to add timestamp to the embed
     default_member_permissions=Permissions.DEFAULT,  # Default permissions for the command
     ephemeral=False,  # Whether the response is ephemeral
     subcommands=True,  # Whether to show subcommands
