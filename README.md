@@ -1,5 +1,7 @@
 # interactions-help
 
+WIP: This extension is currently work-in-progress, which means it might not function well.
+
 ## Installation
 
 ### Install from PyPi
