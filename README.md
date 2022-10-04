@@ -36,6 +36,10 @@ client.load("interactions.ext.help")
 client.start()
 ```
 
+### Default configuration
+
+![image](https://github.com/ItsRqtl/interactions-help/blob/master/img/preview-original.png?raw=true)
+
 ### Configurate the help command
 
 To configurate the help command, simply pass the values when you load the extension.
