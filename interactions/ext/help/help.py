@@ -50,7 +50,7 @@ class Help(Extension):
         self.allCommands: list = []
         self.embed: Embed = None
 
-    def parse_value(cmd: Command):
+    def parse_value(self, cmd: Command):
         value = ""
         # have options
         if cmd.options:
