@@ -12,32 +12,20 @@ from interactions import (
     extension_command,
 )
 
-name = "help"
-description = "Shows help message"
-default_member_permissions = Permissions.DEFAULT
-
-
 class Help(Extension):
     global name, description, default_member_permissions
 
     def __init__(
         self,
         client,
-        name,
-        description,
         embed_title,
         embed_description,
         embed_color,
         embed_footer,
         embed_timestamp,
-        default_member_permissions,
         ephemeral,
         subcommands,
     ):
-        name: str = name
-        description: str = description
-        default_member_permissions: Permissions = default_member_permissions
-
         self.client: Client = client
         self.embed_title: str = embed_title
         self.embed_description: str = embed_description
@@ -100,9 +88,9 @@ class Help(Extension):
         return value
 
     @extension_command(
-        name=name,
-        description=description,
-        default_member_permissions=default_member_permissions,
+        name='help',
+        description='Shows help message',
+        default_member_permissions=Permissions.DEFAULT,
     )
     async def _help(self, ctx):
         if (
@@ -161,27 +149,21 @@ class Help(Extension):
 
 def setup(
     client,
-    cmd_name="help",  # The name of the command
-    cmd_description="Shows help message",  # The description of the command
     embed_title="Help",  # Title of the embed
     embed_description="Here is a list of all commands",  # Description of the embed
     embed_color=0x000000,  # Color of the embed
     embed_footer=None,  # Footer of the embed
     embed_timestamp=False,  # Weather to add timestamp to the embed
-    default_member_permissions=Permissions.DEFAULT,  # Default permissions for the command
     ephemeral=False,  # Whether the response is ephemeral
     subcommands=True,  # Whether to show subcommands
 ):
     return Help(
         client,
-        cmd_name,
-        cmd_description,
         embed_title,
         embed_description,
         embed_color,
         embed_footer,
         embed_timestamp,
-        default_member_permissions,
         ephemeral,
         subcommands,
     )
