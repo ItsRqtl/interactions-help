@@ -1,7 +1,10 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
+
+from interactions.ext.paginator import Page, Paginator
 
 from interactions import (
+    Button,
     Client,
     Command,
     Embed,
@@ -12,6 +15,30 @@ from interactions import (
     Permissions,
     extension_command,
 )
+
+
+class PaginatorFormat:
+    def __init__(
+        self,
+        timeout: Optional[Union[int, float]] = 60,
+        author_only: bool = False,
+        use_buttons: bool = True,
+        use_index: bool = False,
+        extended_buttons: bool = True,
+        buttons: Optional[Dict[str, Button]] = None,
+        placeholder: str = "Page",
+        disable_after_timeout: bool = True,
+        remove_after_timeout: bool = False,
+    ) -> None:
+        self.timeout = timeout
+        self.author_only = author_only
+        self.use_buttons = use_buttons
+        self.use_index = use_index
+        self.extended_buttons = extended_buttons
+        self.buttons = buttons
+        self.placeholder = placeholder
+        self.disable_after_timeout = disable_after_timeout
+        self.remove_after_timeout = remove_after_timeout
 
 
 class Help(Extension):
@@ -27,6 +54,8 @@ class Help(Extension):
         subcommands,
         ignore_class,
         ignore_command,
+        pagination,
+        paginator_format,
     ):
         self.client: Client = client
         self.embed_title: str = embed_title
@@ -38,9 +67,12 @@ class Help(Extension):
         self.subcommands: bool = subcommands
         self.ignore_class: List[str] = ignore_class
         self.ignore_command: List[str] = ignore_command
+        self.pagination: bool = pagination
+        self.paginator_format: PaginatorFormat = paginator_format
 
         self.allCommands: list = []
         self.embed: Embed = None
+        self.paginator: Paginator = None
 
     def parse_value(self, cmd: Command):
         value = ""
@@ -93,7 +125,11 @@ class Help(Extension):
         default_member_permissions=Permissions.DEFAULT,
     )
     async def _help(self, ctx):
-        if not self.allCommands or self.allCommands != self.client._commands or self.embed is None:
+        if (
+            not self.allCommands
+            or self.allCommands != self.client._commands
+            or (self.embed is None and self.paginator is None)
+        ):
             self.allCommands = self.client._commands
             commands = {i.name: i for i in self.allCommands.copy()}
             extensions = []
@@ -132,15 +168,55 @@ class Help(Extension):
                 if value:
                     fields.append(EmbedField(name="No category", value=value, inline=False))
 
-            self.embed = Embed(
-                title=self.embed_title,
-                description=self.embed_description,
-                color=self.embed_color,
-                fields=fields,
-                footer=self.embed_footer,
-                timestamp=datetime.utcnow() if self.embed_timestamp else None,
+            if self.pagination and len(fields) > 1:
+                self.embed = None
+                self.paginator = Paginator(
+                    self.client,
+                    ctx,
+                    [
+                        Page(
+                            embeds=[
+                                Embed(
+                                    title=self.embed_title,
+                                    description=self.embed_description,
+                                    color=self.embed_color,
+                                    fields=[i],
+                                    footer=self.embed_footer,
+                                    timestamp=datetime.utcnow() if self.embed_timestamp else None,
+                                )
+                            ]
+                        )
+                        for i in fields
+                    ],
+                    (pf := self.paginator_format).timeout,
+                    pf.author_only,
+                    pf.use_buttons,
+                    False,
+                    pf.use_index,
+                    pf.extended_buttons,
+                    pf.buttons,
+                    pf.placeholder,
+                    pf.disable_after_timeout,
+                    pf.remove_after_timeout,
+                )
+            else:
+                self.paginator = None
+                self.embed = Embed(
+                    title=self.embed_title,
+                    description=self.embed_description,
+                    color=self.embed_color,
+                    fields=fields,
+                    footer=self.embed_footer,
+                    timestamp=datetime.utcnow() if self.embed_timestamp else None,
+                )
+        if self.embed:
+            await ctx.send(
+                embeds=[self.embed],
+                ephemeral=False if self.pagination else self.ephemeral,
             )
-        await ctx.send(embeds=[self.embed], ephemeral=self.ephemeral)
+        elif self.paginator:
+            self.paginator.ctx = ctx
+            await Paginator(**self.paginator._json).run()
 
 
 def setup(
@@ -150,10 +226,16 @@ def setup(
     embed_color: Optional[int] = 0x000000,  # Color of the embed
     embed_footer: Optional[EmbedFooter] = None,  # Footer of the embed
     embed_timestamp: Optional[bool] = False,  # Weather to add timestamp to the embed
-    ephemeral: Optional[bool] = False,  # Whether the response is ephemeral
+    ephemeral: Optional[
+        bool
+    ] = False,  # Whether the response is ephemeral (ignored if pagination is enabled)
     subcommands: Optional[bool] = True,  # Whether to show subcommands
     ignore_class: Optional[List[str]] = [],  # List of names of extension class to ignore
     ignore_command: Optional[List[str]] = [],  # List of names of commands to ignore
+    pagination: Optional[bool] = False,  # Whether to paginate the embed
+    paginator_format: Optional[
+        PaginatorFormat
+    ] = PaginatorFormat(),  # Format of the paginator (ignored if pagination is disabled)
 ):
     return Help(
         client,
@@ -166,4 +248,6 @@ def setup(
         subcommands,
         ignore_class,
         [i.lower() for i in ignore_command],
+        pagination,
+        paginator_format,
     )
