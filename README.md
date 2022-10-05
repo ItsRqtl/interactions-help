@@ -69,3 +69,5 @@ Here is the parameters
 |subcommands|Optional[bool]|Whether to show subcommands|True|
 |ignore_class|Optional[List[str]]|List of names of extension class to ignore|[]|
 |ignore_command|Optional[list[str]]|List of names of commands to ignore|[]|
+|pagination|Optional[bool]|Whether to paginate the help command|False|
+|paginator_format|Optional[PaginatorFormat]|Format of the paginator|PaginatorFormat()|
