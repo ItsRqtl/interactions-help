@@ -60,10 +60,12 @@ Here is the parameters
 
 |Parameter|Type|Description|Default value|
 |---|---|---|---|
-|embed_title|str|Title of the embed|Help|
-|embed_description|str|Description of the embed|Here is a list of all commands|
-|embed_color|int|Color of the embed|0x000000|
-|embed_footer|EmbedFooter|Footer of the embed|None|
-|embed_timestamp|bool|Whether to add a timestamp to the embed|False|
-|ephemeral|bool|Whether the response is ephemeral|False|
-|subcommands|bool|Whether to show subcommands|True|
+|embed_title|Optional[str]|Title of the embed|Help|
+|embed_description|Optional[str]|Description of the embed|Here is a list of all commands|
+|embed_color|Optional[int]|Color of the embed|0x000000|
+|embed_footer|Optional[EmbedFooter]|Footer of the embed|None|
+|embed_timestamp|Optional[bool]|Whether to add a timestamp to the embed|False|
+|ephemeral|Optional[bool]|Whether the response is ephemeral|False|
+|subcommands|Optional[bool]|Whether to show subcommands|True|
+|ignore_class|Optional[List[str]]|List of names of extension class to ignore|[]|
+|ignore_command|Optional[list[str]]|List of names of commands to ignore|[]|

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List, Optional
 
 from interactions import (
     Client,
@@ -12,9 +13,8 @@ from interactions import (
     extension_command,
 )
 
-class Help(Extension):
-    global name, description, default_member_permissions
 
+class Help(Extension):
     def __init__(
         self,
         client,
@@ -25,6 +25,8 @@ class Help(Extension):
         embed_timestamp,
         ephemeral,
         subcommands,
+        ignore_class,
+        ignore_command,
     ):
         self.client: Client = client
         self.embed_title: str = embed_title
@@ -34,6 +36,8 @@ class Help(Extension):
         self.embed_timestamp: bool = embed_timestamp
         self.ephemeral: bool = ephemeral
         self.subcommands: bool = subcommands
+        self.ignore_class: List[str] = ignore_class
+        self.ignore_command: List[str] = ignore_command
 
         self.allCommands: list = []
         self.embed: Embed = None
@@ -48,11 +52,7 @@ class Help(Extension):
                 # have subcommand groups
                 if (
                     len(
-                        groups := [
-                            i
-                            for i in cmd.options
-                            if i.type == OptionType.SUB_COMMAND_GROUP
-                        ]
+                        groups := [i for i in cmd.options if i.type == OptionType.SUB_COMMAND_GROUP]
                     )
                     > 0
                 ):
@@ -88,53 +88,49 @@ class Help(Extension):
         return value
 
     @extension_command(
-        name='help',
-        description='Shows help message',
+        name="help",
+        description="Shows help message",
         default_member_permissions=Permissions.DEFAULT,
     )
     async def _help(self, ctx):
-        if (
-            not self.allCommands
-            or self.allCommands != self.client._commands
-            or self.embed is None
-        ):
+        if not self.allCommands or self.allCommands != self.client._commands or self.embed is None:
             self.allCommands = self.client._commands
             commands = {i.name: i for i in self.allCommands.copy()}
             extensions = []
             for i in self.client._extensions.values():
-                if isinstance(i, Extension) and not i.__module__.startswith(
-                    "interactions.ext."
-                ):
+                if isinstance(i, Extension) and not i.__module__.startswith("interactions.ext."):
                     extensions.append(i)
             extensions.sort(key=lambda x: x.__module__)
 
             fields = []
             for ext in extensions:
-                value = ""
-                for command in ext._commands:
-                    cmd = commands[command[8:]]
-                    if self.subcommands:
-                        value += self.parse_value(cmd)
-                    else:
-                        value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
-                    commands.pop(command[8:])
-                if value:
-                    fields.append(
-                        EmbedField(
-                            name=ext.__class__.__name__, value=value, inline=False
+                if ext.__class__.__name__ in self.ignore_class:
+                    for command in ext._commands:
+                        commands.pop(command[8:])
+                else:
+                    value = ""
+                    for command in ext._commands:
+                        cmd = commands[command[8:]]
+                        if cmd not in self.ignore_command:
+                            if self.subcommands:
+                                value += self.parse_value(cmd)
+                            else:
+                                value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
+                        commands.pop(command[8:])
+                    if value:
+                        fields.append(
+                            EmbedField(name=ext.__class__.__name__, value=value, inline=False)
                         )
-                    )
             if commands:
                 value = ""
                 for cmd in commands.values():
-                    if self.subcommands:
-                        value += self.parse_value(cmd)
-                    else:
-                        value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
+                    if cmd not in self.ignore_command:
+                        if self.subcommands:
+                            value += self.parse_value(cmd)
+                        else:
+                            value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
                 if value:
-                    fields.append(
-                        EmbedField(name="No category", value=value, inline=False)
-                    )
+                    fields.append(EmbedField(name="No category", value=value, inline=False))
 
             self.embed = Embed(
                 title=self.embed_title,
@@ -149,13 +145,15 @@ class Help(Extension):
 
 def setup(
     client,
-    embed_title="Help",  # Title of the embed
-    embed_description="Here is a list of all commands",  # Description of the embed
-    embed_color=0x000000,  # Color of the embed
-    embed_footer=None,  # Footer of the embed
-    embed_timestamp=False,  # Weather to add timestamp to the embed
-    ephemeral=False,  # Whether the response is ephemeral
-    subcommands=True,  # Whether to show subcommands
+    embed_title: Optional[str] = "Help",  # Title of the embed
+    embed_description: Optional[str] = "Here is a list of all commands",  # Description of the embed
+    embed_color: Optional[int] = 0x000000,  # Color of the embed
+    embed_footer: Optional[EmbedFooter] = None,  # Footer of the embed
+    embed_timestamp: Optional[bool] = False,  # Weather to add timestamp to the embed
+    ephemeral: Optional[bool] = False,  # Whether the response is ephemeral
+    subcommands: Optional[bool] = True,  # Whether to show subcommands
+    ignore_class: Optional[List[str]] = [],  # List of names of extension class to ignore
+    ignore_command: Optional[List[str]] = [],  # List of names of commands to ignore
 ):
     return Help(
         client,
@@ -166,4 +164,6 @@ def setup(
         embed_timestamp,
         ephemeral,
         subcommands,
+        ignore_class,
+        [i.lower() for i in ignore_command],
     )
