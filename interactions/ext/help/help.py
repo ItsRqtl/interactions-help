@@ -146,8 +146,8 @@ class Help(Extension):
                 else:
                     value = ""
                     for command in ext._commands:
-                        cmd = commands[command[8:]]
-                        if cmd not in self.ignore_command:
+                        if command[8:].lower() not in self.ignore_command:
+                            cmd = commands[command[8:]]
                             if self.subcommands:
                                 value += self.parse_value(cmd)
                             else:
@@ -158,9 +158,9 @@ class Help(Extension):
                             EmbedField(name=ext.__class__.__name__, value=value, inline=False)
                         )
             if commands:
-                value = ""
-                for cmd in commands.values():
-                    if cmd not in self.ignore_command:
+                for command in commands:
+                    if command[8:].lower() not in self.ignore_command:
+                        cmd = commands[command[8:]]
                         if self.subcommands:
                             value += self.parse_value(cmd)
                         else:
