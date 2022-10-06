@@ -58,7 +58,7 @@ client.start()
 
 ### Pagination
 
-Do you have a long list of commands? Now you can paginate it with [dinteractions-paginator](https://github.com/interactions-py/paginator)!
+Do you have a long list of commands? Now you can paginate it with [dinteractions-paginator](https://github.com/interactions-py/paginator)!  
 To paginate the help command, put `pagination=True` when you load the extension.
 
 ```py
