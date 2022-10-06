@@ -47,13 +47,7 @@ client.start()
 To configurate the help command, simply pass the values when you load the extension.
 
 ```py
-from interactions import Client
-
-client = Client(token="...")
-
 client.load("interactions.ext.help", embed_color=0x00FF00, ephemeral=True, subcommands=True)
-
-client.start()
 ```
 
 ### Pagination
@@ -62,26 +56,15 @@ Do you have a long list of commands? Now you can paginate it with [dinteractions
 To paginate the help command, put `pagination=True` when you load the extension.
 
 ```py
-from interactions import Client
-
-client = Client(token="...")
-
 client.load("interactions.ext.help", pagination=True)
-
-client.start()
 ```
 
 To customize the paginator, do the following:
 
 ```py
-from interactions import Client
 from interactions.ext.help import PaginatorFormat
-
-client = Client(token="...")
-
+...
 client.load("interactions.ext.help", pagination=True, paginator_format=PaginatorFormat(...))
-
-client.start()
 ```
 
 PaginatorFormat has exactly the same params as [Paginator](https://github.com/interactions-py/paginator#-class-paginator) except:
