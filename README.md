@@ -1,5 +1,7 @@
 # interactions-help
 
+[![ipy](https://img.shields.io/badge/using-interactions.py-000000.svg?style=for-the-badge&logo=discord&logoWidth=20)](https://github.com/interactions-py/library)
+
 WIP: This extension is currently work-in-progress, which means it might not function well.
 
 ## Installation
@@ -7,7 +9,7 @@ WIP: This extension is currently work-in-progress, which means it might not func
 ### Install from PyPi
 
 ```bat
-Currently not available
+pip install -U interactions-help
 ```
 
 ### Install from github
@@ -52,7 +54,7 @@ client.load("interactions.ext.help", embed_color=0x00FF00, ephemeral=True, subco
 
 ### Pagination
 
-Do you have a long list of commands? Now you can paginate it with [dinteractions-paginator](https://github.com/interactions-py/paginator)!  
+Do you have a long list of commands? Now you can paginate it with [dinteractions-paginator](https://github.com/interactions-py/paginator)!
 To paginate the help command, put `pagination=True` when you load the extension.
 
 ```py
@@ -68,6 +70,7 @@ client.load("interactions.ext.help", pagination=True, paginator_format=Paginator
 ```
 
 PaginatorFormat has exactly the same params as [Paginator](https://github.com/interactions-py/paginator#-class-paginator) except:
+
 - it does not take `func_before_edit` and `func_after_edit`
 - `use_select` is forced to be False (the title is the same across pages)
 - `client` and `ctx` will be applied itself
