@@ -56,7 +56,39 @@ client.load("interactions.ext.help", embed_color=0x00FF00, ephemeral=True, subco
 client.start()
 ```
 
-Here is the parameters
+### Using dinteractions-paginator
+
+To paginate the help command, put `pagination=True` when you load the extension.
+
+```py
+from interactions import Client
+
+client = Client(token="...")
+
+client.load("interactions.ext.help", pagination=True)
+
+client.start()
+```
+
+To customize the paginator, do the following:
+
+```py
+from interactions import Client
+from interactions.ext.help import PaginatorFormat
+
+client = Client(token="...")
+
+client.load("interactions.ext.help", pagination=True, paginator_format=PaginatorFormat(...))
+
+client.start()
+```
+
+PaginatorFormat takes exactly the same as Paginator except:
+- it does not take `func_before_edit` and `func_after_edit`
+- `use_select` is forced to be False (the title is the same across pages)
+- `client` and `ctx` will be applied itself
+
+### Parameters for client.load
 
 |Parameter|Type|Description|Default value|
 |---|---|---|---|
