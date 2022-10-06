@@ -56,8 +56,9 @@ client.load("interactions.ext.help", embed_color=0x00FF00, ephemeral=True, subco
 client.start()
 ```
 
-### Using dinteractions-paginator
+### Pagination
 
+Do you have a long list of commands? Now you can paginate it with [dinteractions-paginator](https://github.com/interactions-py/paginator)!
 To paginate the help command, put `pagination=True` when you load the extension.
 
 ```py
@@ -83,7 +84,7 @@ client.load("interactions.ext.help", pagination=True, paginator_format=Paginator
 client.start()
 ```
 
-PaginatorFormat takes exactly the same as Paginator except:
+PaginatorFormat has exactly the same params as [Paginator](https://github.com/interactions-py/paginator#-class-paginator) except:
 - it does not take `func_before_edit` and `func_after_edit`
 - `use_select` is forced to be False (the title is the same across pages)
 - `client` and `ctx` will be applied itself
@@ -97,9 +98,9 @@ PaginatorFormat takes exactly the same as Paginator except:
 |embed_color|Optional[int]|Color of the embed|0x000000|
 |embed_footer|Optional[EmbedFooter]|Footer of the embed|None|
 |embed_timestamp|Optional[bool]|Whether to add a timestamp to the embed|False|
-|ephemeral|Optional[bool]|Whether the response is ephemeral|False|
+|ephemeral|Optional[bool]|Whether the response is ephemeral (ignored if pagination is enabled)|False|
 |subcommands|Optional[bool]|Whether to show subcommands|True|
 |ignore_class|Optional[List[str]]|List of names of extension class to ignore|[]|
 |ignore_command|Optional[list[str]]|List of names of commands to ignore|[]|
 |pagination|Optional[bool]|Whether to paginate the help command|False|
-|paginator_format|Optional[PaginatorFormat]|Format of the paginator|PaginatorFormat()|
+|paginator_format|Optional[PaginatorFormat]|Format of the paginator (ignored if pagination is disabled)|PaginatorFormat()|
