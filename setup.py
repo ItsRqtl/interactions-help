@@ -4,12 +4,10 @@ from setuptools import setup
 
 # set the values below
 github_repository_url: str = "https://github.com/ItsRqtl/interactions-help"
-project_version: str = "0.0.1"
+project_version: str = "0.0.2"
 author_name: str = "ItsRqtl"
 author_email: str = "itsrqtl@gmail.com"
-short_project_description: str = (
-    "An extension library for interactions.py to create help command."
-)
+short_project_description: str = "An extension library for interactions.py to create help command."
 
 # don't touch anything after this comment
 
