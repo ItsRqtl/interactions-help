@@ -56,6 +56,7 @@ class Help(Extension):
         ignore_command,
         pagination,
         paginator_format,
+        no_category,
     ):
         self.client: Client = client
         self.embed_title: str = embed_title
@@ -69,6 +70,7 @@ class Help(Extension):
         self.ignore_command: List[str] = ignore_command
         self.pagination: bool = pagination
         self.paginator_format: PaginatorFormat = paginator_format
+        self.no_category: str = no_category
 
         self.allCommands: list = []
         self.embed: Embed = None
@@ -168,7 +170,7 @@ class Help(Extension):
                         else:
                             value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
                 if value:
-                    fields.append(EmbedField(name="No category", value=value, inline=False))
+                    fields.append(EmbedField(name=self.no_category, value=value, inline=False))
 
             if self.pagination and len(fields) > 1:
                 self.embed = None
@@ -232,12 +234,13 @@ def setup(
         bool
     ] = False,  # Whether the response is ephemeral (ignored if pagination is enabled)
     subcommands: Optional[bool] = True,  # Whether to show subcommands
-    ignore_class: Optional[List[str]] = [],  # List of names of extension class to ignore
+    ignore_class: Optional[List[str]] = [],  # List of names of class to ignore
     ignore_command: Optional[List[str]] = [],  # List of names of commands to ignore
     pagination: Optional[bool] = False,  # Whether to paginate the embed
     paginator_format: Optional[
         PaginatorFormat
     ] = PaginatorFormat(),  # Format of the paginator (ignored if pagination is disabled)
+    no_category: Optional[str] = "No category",  # Name of the category for commands with no category (not in a class)
 ):
     return Help(
         client,
@@ -252,4 +255,5 @@ def setup(
         [i.lower() for i in ignore_command],
         pagination,
         paginator_format,
+        no_category,
     )

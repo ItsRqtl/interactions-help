@@ -104,3 +104,5 @@ PaginatorFormat has exactly the same params as [Paginator](https://github.com/in
 |ignore_command|Optional[list[str]]|List of names of commands to ignore|[]|
 |pagination|Optional[bool]|Whether to paginate the help command|False|
 |paginator_format|Optional[PaginatorFormat]|Format of the paginator (ignored if pagination is disabled)|PaginatorFormat()|
+|no_category|Optional[str]|Name of the category for commands with no category (not in a class)|No category|
+
