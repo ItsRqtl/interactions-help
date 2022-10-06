@@ -13,14 +13,13 @@ from interactions import (
     EmbedFooter,
     Extension,
     OptionType,
-    Permissions,
     extension_command,
 )
 
 try:
-    from interactions.api.models.attrs_utils import MISSING
+    from interactions.api.models.attrs_utils import MISSING # ipy 4.3.1
 except ImportError:
-    from interactions.utils.attr_utils import MISSING
+    from interactions.utils.attrs_utils import MISSING # ipy 4.3.2
 
 class PaginatorFormat:
     def __init__(
