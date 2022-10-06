@@ -76,6 +76,8 @@ PaginatorFormat has exactly the same params as [Paginator](https://github.com/in
 
 |Parameter|Type|Description|Default value|
 |---|---|---|---|
+|consider_scope|Optional[bool]|Only show commands that is available in guild|True|
+|consider_permissions|Optional[bool]|Only show commands that the user can use|True|
 |embed_title|Optional[str]|Title of the embed|Help|
 |embed_description|Optional[str]|Description of the embed|Here is a list of all commands|
 |embed_color|Optional[int]|Color of the embed|0x000000|
@@ -88,4 +90,3 @@ PaginatorFormat has exactly the same params as [Paginator](https://github.com/in
 |pagination|Optional[bool]|Whether to paginate the help command|False|
 |paginator_format|Optional[PaginatorFormat]|Format of the paginator (ignored if pagination is disabled)|PaginatorFormat()|
 |no_category|Optional[str]|Name of the category for commands with no category (not in a class)|No category|
-
