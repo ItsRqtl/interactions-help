@@ -231,7 +231,7 @@ class Help(Extension):
             embed = Embed(
                 title=self.embed_title,
                 description=self.embed_description,
-                color=self.embed_color,
+                color=self.embed_color if self.embed_color >= 0 else randint(0, 0xFFFFFF),
                 fields=fields,
                 footer=self.embed_footer,
                 timestamp=datetime.utcnow() if self.embed_timestamp else None,
