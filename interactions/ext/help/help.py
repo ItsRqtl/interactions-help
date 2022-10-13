@@ -1,4 +1,5 @@
 from datetime import datetime
+from random import randint
 from typing import Dict, List, Optional, Union
 
 from interactions.ext.paginator import Page, Paginator
@@ -17,9 +18,10 @@ from interactions import (
 )
 
 try:
-    from interactions.api.models.attrs_utils import MISSING # ipy 4.3.1
+    from interactions.api.models.attrs_utils import MISSING  # ipy 4.3.1
 except ImportError:
-    from interactions.utils.attrs_utils import MISSING # ipy 4.3.2
+    from interactions.utils.attrs_utils import MISSING  # ipy 4.3.2
+
 
 class PaginatorFormat:
     def __init__(
@@ -66,7 +68,7 @@ class Help(Extension):
     ):
         self.client: Client = client
         self.consider_scope: bool = consider_scope
-        self.consider_permissions: bool = consider_permissions  
+        self.consider_permissions: bool = consider_permissions
         self.embed_title: str = embed_title
         self.embed_description: str = embed_description
         self.embed_color: int = embed_color
@@ -125,11 +127,8 @@ class Help(Extension):
             value += f"`{cmd.name}`{f' - {cmd.description}' if cmd.description != 'No description set' else ''}\n"
         return value
 
-    @extension_command(
-        name="help",
-        description="Shows help message"
-    )
-    async def _help(self, ctx:CommandContext):
+    @extension_command(name="help", description="Shows help message")
+    async def _help(self, ctx: CommandContext):
         commands = {i.name: i for i in self.client._commands}
         extensions = []
         for i in self.client._extensions.values():
@@ -147,7 +146,19 @@ class Help(Extension):
                 for command in ext._commands:
                     if command[8:].lower() not in self.ignore_command:
                         cmd = commands[command[8:]]
-                        if (not self.consider_scope or cmd.scope in [MISSING, None] or cmd.scope in [int(ctx.guild_id), ctx.guild]  or any(i in [int(ctx.guild_id), ctx.guild] for i in cmd.scope)) and (not self.consider_permissions or cmd.default_member_permissions in [MISSING, None] or (ctx.author.permissions and cmd.default_member_permissions in ctx.author.permissions)):
+                        if (
+                            not self.consider_scope
+                            or cmd.scope in [MISSING, None]
+                            or cmd.scope in [int(ctx.guild_id), ctx.guild]
+                            or any(i in [int(ctx.guild_id), ctx.guild] for i in cmd.scope)
+                        ) and (
+                            not self.consider_permissions
+                            or cmd.default_member_permissions in [MISSING, None]
+                            or (
+                                ctx.author.permissions
+                                and cmd.default_member_permissions in ctx.author.permissions
+                            )
+                        ):
                             if self.subcommands:
                                 value += self.parse_value(cmd)
                             else:
@@ -162,7 +173,19 @@ class Help(Extension):
             for command in commands:
                 if command.lower() not in self.ignore_command:
                     cmd = commands[command]
-                    if (not self.consider_scope or cmd.scope in [MISSING, None] or cmd.scope in [int(ctx.guild_id), ctx.guild]  or any(i in [int(ctx.guild_id), ctx.guild] for i in cmd.scope)) and (not self.consider_permissions or cmd.default_member_permissions in [MISSING, None] or (ctx.author.permissions and cmd.default_member_permissions in ctx.author.permissions)):
+                    if (
+                        not self.consider_scope
+                        or cmd.scope in [MISSING, None]
+                        or cmd.scope in [int(ctx.guild_id), ctx.guild]
+                        or any(i in [int(ctx.guild_id), ctx.guild] for i in cmd.scope)
+                    ) and (
+                        not self.consider_permissions
+                        or cmd.default_member_permissions in [MISSING, None]
+                        or (
+                            ctx.author.permissions
+                            and cmd.default_member_permissions in ctx.author.permissions
+                        )
+                    ):
                         if self.subcommands:
                             value += self.parse_value(cmd)
                         else:
@@ -181,7 +204,9 @@ class Help(Extension):
                             Embed(
                                 title=self.embed_title,
                                 description=self.embed_description,
-                                color=self.embed_color,
+                                color=self.embed_color
+                                if self.embed_color >= 0
+                                else randint(0, 0xFFFFFF),
                                 fields=[i],
                                 footer=self.embed_footer,
                                 timestamp=datetime.utcnow() if self.embed_timestamp else None,
@@ -223,8 +248,8 @@ class Help(Extension):
 
 def setup(
     client,
-    consider_scope=True, # only show commands that is available in guild
-    consider_permissions=True, # only show commands that the user can use
+    consider_scope=True,  # only show commands that is available in guild
+    consider_permissions=True,  # only show commands that the user can use
     embed_title: Optional[str] = "Help",  # Title of the embed
     embed_description: Optional[str] = "Here is a list of all commands",  # Description of the embed
     embed_color: Optional[int] = 0x000000,  # Color of the embed
@@ -240,7 +265,9 @@ def setup(
     paginator_format: Optional[
         PaginatorFormat
     ] = PaginatorFormat(),  # Format of the paginator (ignored if pagination is disabled)
-    no_category: Optional[str] = "No category",  # Name of the category for commands with no category (not in a class)
+    no_category: Optional[
+        str
+    ] = "No category",  # Name of the category for commands with no category (not in a class)
 ):
     return Help(
         client,
