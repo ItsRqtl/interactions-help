@@ -130,10 +130,13 @@ class Help(Extension):
     @extension_command(name="help", description="Shows help message")
     async def _help(self, ctx: CommandContext):
         commands = {i.name: i for i in self.client._commands}
-        extensions = []
-        for i in self.client._extensions.values():
-            if isinstance(i, Extension) and not i.__module__.startswith("interactions.ext."):
-                extensions.append(i)
+        extensions = [
+            i
+            for i in self.client._extensions.values()
+            if isinstance(i, Extension)
+            and not i.__module__.startswith("interactions.ext.")
+        ]
+
         extensions.sort(key=lambda x: x.__module__)
 
         fields = []
